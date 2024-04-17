@@ -1,115 +1,125 @@
 // SHARED MEMORY ------>  SENDER
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<sys/ipc.h>
-#include<sys/shm.h>
-#include<sys/types.h>
-#include<unistd.h>
-struct share
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+
+struct area
 {
-    int server;
-    int client;
-    int flag;
-    char chat[100];
+    int server_up;
+    int client_up;
+    int rw;
+    char msg[100];
 };
-struct share* shmptr1;
+
+struct area *shmptr;
+
 int main()
 {
     int shmid;
-    int key=500;
-    shmid=shmget(key,sizeof(struct share),IPC_CREAT|0666);
-    shmptr1=(struct share*)shmat(shmid,NULL,0);
-    shmptr1->flag=0;
-    while(1)
+    shmid = shmget(700, sizeof(struct area), IPC_CREAT | 0666);
+    shmptr = (struct area *)shmat(shmid, NULL, 0);
+    shmptr->rw = 0; 
+    while (1)
     {
-        while(shmptr1->flag!=1);
-
-            while(shmptr1->client==0)
+        while (shmptr->rw != 1)
+            ;
+          
+        while(shmptr->client_up == 0)
+        {
+            printf("get from user 2:");
+            if(strcmp(shmptr->msg, "stop") == 0)
             {
-                printf("Recieved from reciever");
-                if(strcmp(shmptr1->chat,"stop")==0)
-                {
-                    exit(1);
-                }
-                else
-                {
-                    puts(shmptr1->chat);
-                }
-                shmptr1->server=0;
-                shmptr1->client=1;
-            }
-            printf("USER 2:");
-            if(strcmp(shmptr1->chat,"stop")==0)
-            {
+                
                 exit(1);
             }
             else
             {
-                fgets(shmptr1->chat,100,stdin);
-                shmptr1->chat[strcspn(shmptr1->chat,"\n")]='\0';
+                puts(shmptr->msg);
             }
-            shmptr1->flag=0;
-        shmctl(shmid,IPC_RMID,NULL);
+            shmptr->server_up = 0;
+            shmptr->client_up = 1;
+        }
+        
+        printf("user1:");
+        if(strcmp(shmptr->msg, "stop") == 0)
+        {
+            exit(1);
+        }
+        else
+        {
+            fgets(shmptr->msg, 100, stdin);
+            shmptr->msg[strcspn(shmptr->msg, "\n")] = '\0'; 
+        }
+        
+        shmptr->rw = 0;
     }
-        return 0;
-    }
+    
+    shmctl(shmid, IPC_RMID, NULL);
+    return 0;
+}
 // SHARED MEMORY ------> RECIEVER
 
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<sys/ipc.h>
-#include<sys/shm.h>
-#include<sys/types.h>
-#include<unistd.h>
-struct share
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+
+struct area
 {
-    int server;
-    int client;
-    int flag;
-    char chat[100];
+    int server_up;
+    int client_up;
+    int rw;
+    char msg[100];
 };
-struct share* shmptr1;
+
+struct area *shmptr;
+
 int main()
 {
     int shmid;
-    int key=500;
-    shmid=shmget(key,sizeof(struct share),IPC_CREAT|0666);
-    shmptr1=(struct share*)shmat(shmid,NULL,0);
-    shmptr1->flag=0;
-    while(1)
-    {
-        while(shmptr1->flag!=1);
+    shmid = shmget(700, sizeof(struct area), IPC_CREAT | 0666);
+    shmptr = (struct area *)shmat(shmid, NULL, 0);
+    shmptr->rw = 0;
 
-            while(shmptr1->client==0)
+    while (1)
+    {
+        while(shmptr->client_up == 1)
+        {
+            printf("get from user1:");
+            if(strcmp(shmptr->msg, "stop") == 0)
             {
-                printf("Recieved from sender");
-                if(strcmp(shmptr1->chat,"stop")==0)
-                {
-                    exit(1);
-                }
-                else
-                {
-                    puts(shmptr1->chat);
-                }
-                shmptr1->server=1;
-                shmptr1->client=0;
-            }
-            printf("USER 1:");
-            if(strcmp(shmptr1->chat,"stop")==0)
-            {
+                shmctl(shmid, IPC_RMID, NULL);
                 exit(1);
             }
             else
             {
-                fgets(shmptr1->chat,100,stdin);
-                shmptr1->chat[strcspn(shmptr1->chat,"\n")]='\0';
+                puts(shmptr->msg);
             }
-            shmptr1->flag=0;
-        shmctl(shmid,IPC_RMID,NULL);
-    }
-        return 0;
+            shmptr->server_up = 1;
+            shmptr->client_up = 0;
+        }
+        
+        printf("user2:");
+        fgets(shmptr->msg, 100, stdin);
+        shmptr->msg[strcspn(shmptr->msg, "\n")] = '\0'; 
+        
+        if(strcmp(shmptr->msg, "stop") == 0)
+        {
+            shmctl(shmid, IPC_RMID, NULL);
+            exit(1);
+        }
+        
+        shmptr->rw = 1;
+        while(shmptr->rw == 1);
     }
 
+    return 0;
+}
