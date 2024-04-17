@@ -50,8 +50,8 @@ int main()
                 shmptr1->chat[strcspn(shmptr1->chat,"\n")]='\0';
             }
             shmptr1->flag=0;
-        }
         shmctl(shmid,IPC_RMID,NULL);
+    }
         return 0;
     }
 // SHARED MEMORY ------> RECIEVER
@@ -108,8 +108,8 @@ int main()
                 shmptr1->chat[strcspn(shmptr1->chat,"\n")]='\0';
             }
             shmptr1->flag=0;
-        }
         shmctl(shmid,IPC_RMID,NULL);
+    }
         return 0;
     }
 
