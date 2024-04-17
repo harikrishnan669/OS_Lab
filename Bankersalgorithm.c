@@ -13,6 +13,15 @@ void calneed() {
             need[i][j] = max[i][j] - alloc[i][j];
         }
     }
+    printf("The need matrix is:");
+    for(i=0;i<m;i++)
+    {
+        for(j=0;j<n;j++)
+        {
+            printf("%d\t",need[i][j]);
+        }
+        printf("\n");
+    }
 }
 
 bool safe() {
