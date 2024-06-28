@@ -101,7 +101,7 @@ void cscan(int arr[],int n,int p,int max){
 
 void main(){
 	printf("DISK SCHEDULING\n");
-	int n,position,i,min,max,p;
+	int n,i,max,p;
 	printf("Enter the disk track limit(max): ");
 	scanf("%d",&max);
 	printf("Enter the number of requests: ");
