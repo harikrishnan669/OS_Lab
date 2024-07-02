@@ -104,7 +104,7 @@ void sjf()
         else
         {
             p[min_index].st=currenttime;
-            p[min_index].ct=p[min_index].s+p[min_index].bt;
+            p[min_index].ct=p[min_index].st+p[min_index].bt;
             p[min_index].tt=p[min_index].ct-p[min_index].at;
             p[min_index].wt=p[min_index].tt-p[min_index].bt;
             completed++;
