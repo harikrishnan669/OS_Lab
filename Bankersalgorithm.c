@@ -34,19 +34,25 @@ bool safe() {
         finish[j] = false;
     }
     int count = 0;
-    while(count < m) { 
+    while(count < m) 
+    { 
         bool found = false;
-        for(i = 0; i < m; i++) {
-            if(!finish[i]) {
+        for(i = 0; i < m; i++)
+        {
+            if(!finish[i]) 
+            {
                 bool can_allocate = true; 
-                for(j = 0; j < n; j++) {
-                    if(need[i][j] > work[j]) {
+                for(j = 0; j < n; j++) 
+                {
+                    if(need[i][j] > work[j]) 
+                    {
                         can_allocate = false; 
                         break;
                     }
                 }
                 if(can_allocate) { 
-                    for(int k = 0; k < n; k++) {
+                    for(int k = 0; k < n; k++)
+                    {
                         work[k] += alloc[i][k];
                     }
                     finish[i] = true;
