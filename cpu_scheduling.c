@@ -43,82 +43,81 @@ void fcfs()
 }
 void sjf()
 {
-        int totalburst,completed=0,currenttime=0;
-        total=0;
-        float avg_wt=0,avg_tt=0;
+    int totalburst,completed=0,currenttime=0;
+    total=0;
+    float avg_wt=0,avg_tt=0;
+    for(i=0;i<n;i++)
+    {
+        totalburst+=p[i].bt;
+    }
+    for(i=0;i<n-1;i++)
+    {
+        for(j=0;j<n-i-1;j++)
+        {
+            if(p[j].at>p[j+1].at)
+            {
+                temp=p[j];
+                p[j]=p[j+1];
+                p[j+1]=temp;
+             }
+        }
+    }
+    for(i=0;i<n-1;i++)
+    {
+        for(j=0;j<n-i-1;j++)
+        {
+        if(p[j].at==p[j+1].at && p[j].bt>p[j+1].bt)
+        {
+            temp=p[j];
+            p[j]=p[j+1];
+            p[j+1]=temp;
+        }
+    }
+    }
+    while(completed!=n)
+    {
+        int min_index=-1;
+        int minimum=totalburst;
         for(i=0;i<n;i++)
         {
-                totalburst+=p[i].bt;
+            if(p[i].at<=currenttime && p[i].completed==0)
+            {
+                if(p[i].bt<minimum)
+                {
+                    minimum=p[i].bt;
+                    min_index=i;
+                }
+                if(p[i].bt==minimum)
+                {
+                    if(p[i].at<p[min_index].at)
+                    {
+                        minimum=p[i].bt;
+                        min_index=i;
+                    }
+                }
+            }
         }
-        for(i=0;i<n-1;i++)
+        if(min_index==-1)
         {
-                for(j=0;j<n-i-1;j++)
-                {
-                        if(p[j].at>p[j+1].at)
-                        {
-                                temp=p[j];
-                                p[j]=p[j+1];
-                                p[j+1]=temp;
-                        }
-                }
+            currenttime++;                          
         }
-        for(i=0;i<n-1;i++)
+        else
         {
-                 for(j=0;j<n-i-1;j++)
-                {
-                        if(p[j].at==p[j+1].at && p[j].bt>p[j+1].bt)
-                        {
-                                temp=p[j];
-                                p[j]=p[j+1];
-                                p[j+1]=temp;
-                        }
-                }
+            p[min_index].st=currenttime;
+            p[min_index].ct=p[min_index].s+p[min_index].bt;
+            p[min_index].tt=p[min_index].ct-p[min_index].at;
+            p[min_index].wt=p[min_index].tt-p[min_index].bt;
+            completed++;
+            p[min_index].completed=1;
+            currenttime=p[min_index].ct;
+            avg_wt+=p[min_index].wt;
+            avg_tt+=p[min_index].tt;
         }
-        while(completed!=n)
-        {
-                int min_index=-1;
-                int minimum=totalburst;
-                for(i=0;i<n;i++)
-                {
-                        if(p[i].at<=currenttime && p[i].completed==0)
-                        {
-                                if(p[i].bt<minimum)
-                                {
-                                        minimum=p[i].bt;
-                                        min_index=i;
-                                }
-                                if(p[i].bt==minimum)
-                                {
-                                        if(p[i].at<p[min_index].at)
-                                        {
-                                                minimum=p[i].bt;
-                                                min_index=i;
-                                        }
-                                }
-                        }
-                }
-                if(min_index==-1)
-                {
-                        currenttime++;                                                                                    
-                }
-                else
-                {
-                        p[min_index].st=currenttime;
-                        p[min_index].ct=p[min_index].st+p[min_index].bt;
-                        p[min_index].tt=p[min_index].ct-p[min_index].at;
-                        p[min_index].wt=p[min_index].tt-p[min_index].bt;
-                        completed++;
-                        p[min_index].completed=1;
-                        currenttime=p[min_index].ct;
-                        avg_wt+=p[min_index].wt;
-                        avg_tt+=p[min_index].tt;
-                        printf("|P%d|%d",p[min_index].pid,p[min_index].ct);
-                }
-        }
-        printf("\nPID\t ARR \t BURST \t COMP \t TURN \t WAIT \n");
+    }
+    printf(" PID | ARR | BURST | COMP | TURN | WAIT \n");
         for(i=0;i<n;i++)
         {
-                printf("\n%d\t%d\t%d\t%d\t%d\t%d\n",p[i].pid,p[i].at,p[i].bt,p[i].ct,p[i].tt,p[i].wt);
+        printf("\n%d\t%d\t%d\t%d\t%d\t%d\n",p[i].pid,p[i].at,p[i].bt,p[i].ct,p[i].tt,p[i].wt);
         }
         printf("\n Average waiting time :%f",avg_wt/n);
         printf("\n Average turnaround time:%f",avg_tt/n);
@@ -198,7 +197,6 @@ void priority()
                         currenttime=p[min_index].ct;
                         avg_wt+=p[min_index].wt;
                         avg_tt+=p[min_index].tt;
-                        printf("|P%d|%d",p[min_index].pid,p[min_index].ct);
                         p[min_index].completed=1;
                 }
         }
@@ -271,8 +269,8 @@ void roundrobin()
                         i=0;
                 }
         }
-        printf("\nAverage turnaround time:%f",(avg_tt/n));
-        printf("\nAverage waiting time:%f",(avg_wt/n));
+        printf("\nAverage turnaround time:%f",avg_tt/n);
+        printf("\nAverage waiting time:%f",avg_wt/n);
 }
 void main()
 {
