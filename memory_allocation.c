@@ -1,173 +1,151 @@
 #include<stdio.h>
-
-typedef struct {
-    int process;
-    int partitionSize;
-} Memory;
-
-void display(Memory partition[30], int n) {
-    int i;
-    printf("\nPartition: |");
-    for (i = 0; i < n; i++) {
-        if (partition[i].process == -1) {
-            printf("     |");
-            continue;
-        }
-        printf(" %3d |", partition[i].process);
+#include<stdlib.h>
+struct block
+{
+    int size;
+    int allocated;
+}b[10],temp;
+struct process
+{
+    int pid;
+    int size;
+    int blocksize;
+}p[20];
+int bn,pn,i,j;
+void display()
+{
+    printf("\n");
+    printf("PID  PROCESS_SIZE  BLOCKSIZE");
+    printf("\n");
+    for(i=0;i<pn;i++)
+    {
+       if(p[i].blocksize==-1)
+       {
+        printf("%d  %d  not allocated\n",p[i].pid,p[i].size);
+       }
+       else
+       {
+           printf("%d  %d  %d\n",p[i].pid,p[i].size,p[i].blocksize);
+       }
     }
-    printf("\nSize:      ");
-    for (i = 0; i < n; i++) {
-        printf(" %3d  ", partition[i].partitionSize);
-    }
-    printf("\n\n");
+    printf("\n");
 }
-
-void FirstFit(Memory* Partition, int n, int process[20], int m) {
-    int i, j, k = 0, flag, Wait[m], internalFragment = 0, externalFragment = 0;
-    for (i = 0; i < m; i++) {
-        flag = 0;
-        for (j = 0; j < n; j++) {
-            if ((Partition[j].partitionSize >= process[i]) && (Partition[j].process == -1)) {
-                Partition[j].process = process[i];
-                flag = 1;
-                internalFragment += (Partition[j].partitionSize - process[i]);
+void firstfit()
+{
+    printf("\n FIRST FIT\n");
+    for(i=0;i<bn;i++)
+    {
+        b[i].allocated=-1;
+    }
+    for(i=0;i<pn;i++)
+    {
+        p[i].blocksize=-1;
+    }
+    for(i=0;i<pn;i++)
+    {
+        for(j=0;j<bn;j++)
+        {
+            if(b[j].allocated==-1 && b[j].size>=p[j].size)
+            {
+                p[i].blocksize=b[j].size;
+                b[j].allocated=1;
                 break;
             }
         }
-        if (flag == 0) {
-            Wait[k++] = process[i];
-        }
     }
-    printf("\nFIRST FIT\n---------");
-    display(Partition, n);
-    if (k == 0)
-        printf("No Processes are waiting for Memory\n\n");
-    else {
-        printf("Processes Waiting for Memory are: ");
-        for (i = 0; i < k; i++)
-            printf(" P(%d) ", Wait[i]);
-    }
-    printf("\nTotal Internal Fragmentation = %d\n", internalFragment);
-    if (k != 0) {
-        for (i = 0; i < n; i++)
-            if (Partition[i].process == -1)
-                externalFragment += (Partition[i].partitionSize);
-    }
-    printf("Total External Fragmentation = %d\n", externalFragment);
-    printf("\n");
+    display();
 }
-
-void BestFit(Memory* Partition, int n, int process[20], int m) {
-    int i, j, k = 0, index, smallest, flag, Wait[m], internalFragment = 0, externalFragment = 0;
-    for (i = 0; i < n; i++)
-        Partition[i].process = -1;
-    for (i = 0; i < m; i++) {
-        index = -1;
-        smallest = 0;
-        flag = 0;
-        for (j = 0; j < n; j++) {
-            if ((Partition[j].partitionSize >= process[i]) && (Partition[j].process == -1)) {
-                if (flag == 0) {
-                    index = j;
-                    smallest = Partition[j].partitionSize;
-                } else if (smallest > Partition[j].partitionSize) {
-                    smallest = Partition[j].partitionSize;
-                    index = j;
-                }
-                flag = 1;
+void bestfit()
+{
+    printf("\n BEST FIT\n");
+    for(i=0;i<bn-1;i++)
+    {
+        for(j=0;j<bn-i-1;j++)
+        {
+            if(b[j].size>b[j+1].size)
+            {
+                temp=b[j];
+                b[j]=b[j+1];
+                b[j+1]=temp;
             }
         }
-        if (index != -1) {
-            Partition[index].process = process[i];
-            internalFragment += (Partition[index].partitionSize - process[i]);
-        } else {
-            Wait[k++] = process[i];
-        }
     }
-    printf("\nBEST FIT\n--------");
-    display(Partition, n);
-    if (k == 0)
-        printf("No Processes are waiting for Memory\n\n");
-    else {
-        printf("Processes Waiting for Memory are: ");
-        for (i = 0; i < k; i++)
-            printf(" P(%d) ", Wait[i]);
+    for(i=0;i<bn;i++)
+    {
+        b[i].allocated=-1;
     }
-    printf("\nTotal Internal Fragmentation = %d\n", internalFragment);
-    if (k != 0) {
-        for (i = 0; i < n; i++)
-            if (Partition[i].process == -1)
-                externalFragment += (Partition[i].partitionSize);
+    for(i=0;i<pn;i++)
+    {
+        p[i].blocksize=-1;
     }
-    printf("Total External Fragmentation = %d\n", externalFragment);
-    printf("\n");
-}
-
-void WorstFit(Memory* Partition, int n, int process[20], int m) {
-    int i, j, k = 0, index, largest, flag, Wait[m], internalFragment = 0, externalFragment = 0;
-    for (i = 0; i < n; i++)
-        Partition[i].process = -1;
-    for (i = 0; i < m; i++) {
-        index = -1;
-        largest = 0;
-        flag = 0;
-        for (j = 0; j < n; j++) {
-            if ((Partition[j].partitionSize >= process[i]) && (Partition[j].process == -1)) {
-                if (flag == 0) {
-                    index = j;
-                    largest = Partition[j].partitionSize;
-                } else if (largest < Partition[j].partitionSize) {
-                    largest = Partition[j].partitionSize;
-                    index = j;
-                }
-                flag = 1;
+    for(i=0;i<pn;i++)
+    {
+        for(j=0;j<bn;j++)
+        {
+            if(b[j].allocated==-1 && b[j].size>=p[i].size)
+            {
+                p[i].blocksize=b[j].size;
+                b[j].allocated=1;
             }
         }
-        if (index != -1) {
-            Partition[index].process = process[i];
-            internalFragment += (Partition[index].partitionSize - process[i]);
-        } else {
-            Wait[k++] = process[i];
+    }
+    display();
+}
+void worstfit()
+{
+    printf("\n WORST FIT\n");
+    for(i=0;i<bn-1;i++)
+    {
+        for(j=0;j<bn-i-1;j++)
+        {
+            if(b[j].size<b[j+1].size)
+            {
+                temp=b[j];
+                b[j]=b[j+1];
+                b[j+1]=temp;
+            }
         }
     }
-    printf("\nWORST FIT\n---------");
-    display(Partition, n);
-    if (k == 0)
-        printf("No Processes are waiting for Memory\n\n");
-    else {
-        printf("Processes Waiting for Memory are: ");
-        for (i = 0; i < k; i++)
-            printf(" P(%d) ", Wait[i]);
+    for(i=0;i<bn;i++)
+    {
+        b[i].allocated=-1;
     }
-    printf("\nTotal Internal Fragmentation = %d\n", internalFragment);
-    if (k != 0) {
-        for (i = 0; i < n; i++)
-            if (Partition[i].process == -1)
-                externalFragment += (Partition[i].partitionSize);
+    for(i=0;i<pn;i++)
+    {
+        p[i].blocksize=-1;
     }
-    printf("Total External Fragmentation = %d\n", externalFragment);
-    printf("\n");
+    for(i=0;i<pn;i++)
+    {
+        for(j=0;j<bn;j++)
+        {
+            if(b[j].allocated==-1 && b[j].size>=p[i].size)
+            {
+                p[i].blocksize=b[j].size;
+                b[j].allocated=1;
+                break;
+            }
+        }
+    }
+    display();
 }
-
-int main() {
-    int n, m, i;
-    printf("Enter the number of partitions: ");
-    scanf("%d", &n);
-    Memory Partition[n];
-    for (i = 0; i < n; i++) {
-        printf("   Enter the Size of Partition %d: ", i + 1);
-        scanf("%d", &Partition[i].partitionSize);
-        Partition[i].process = -1;
+void main()
+{
+    printf("Enter the number of blocks:");
+    scanf("%d",&bn);
+    for(i=0;i<bn;i++)
+    {
+        printf("Enter the size of block %d:",i+1);
+        scanf("%d",&b[i].size);
     }
-    printf("Enter the number of processes: ");
-    scanf("%d", &m);
-    int process[m];
-    for (i = 0; i < m; i++) {
-        printf("   Enter the Size of Process %d: ", i + 1);
-        scanf("%d", &process[i]);
+    printf("Enter the number of process:");
+    scanf("%d",&pn);
+    for(i=0;i<pn;i++)
+    {
+        printf("Enter the size of process %d:",i+1);
+        scanf("%d",&p[i].size);
+        p[i].pid=i+1;
     }
-    FirstFit(Partition, n, process, m);
-    BestFit(Partition, n, process, m);
-    WorstFit(Partition, n, process, m);
-    printf("\n");
+    firstfit();
+    bestfit();
+    worstfit();
 }
